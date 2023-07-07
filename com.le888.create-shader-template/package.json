@@ -1,0 +1,18 @@
+{
+    "name": "com.le888.create-shader-template",
+    "version": "1.0.0",
+    "displayName": "CreateShaderTemplate",
+    "description": "CreateShaderTemplate",
+    "unity": "2021.3",
+    "dependencies": {
+    },
+    "keywords": [
+        "CreateShaderTemplate",
+        "Template"
+    ],
+    "author": {
+        "name": "liuleyou",
+        "email": "707649841@qq.com"
+    },
+    "license": "MIT"
+}
