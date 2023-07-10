@@ -63,9 +63,9 @@ Shader "Hidden/CustomShaderTemplate"
                 // The positionOS variable contains the vertex positions in object
                 // space.
                 float4 positionOS : POSITION;
-                float3 normalOS : NORMAL;
-                float2 uv : TEXCOORD0;
-                float3 tangentOS : TANGENT;
+                half3 normalOS : NORMAL;
+                half2 uv : TEXCOORD0;
+                half3 tangentOS : TANGENT;
                 // float3 tangent : TANGENT;
             };
 
@@ -73,10 +73,10 @@ Shader "Hidden/CustomShaderTemplate"
             {
                 // The positions in this struct must have the SV_POSITION semantic.
                 float4 positionHCS : SV_POSITION;
-                float3 normalWS : TEXCOORD0;
-                float3 positionWS : TEXCOORD1;
-                float2 uv : TEXCOORD2;
-                float3 tangentWS : TEXCOORD3;
+                half3 normalWS : TEXCOORD0;
+                half3 positionWS : TEXCOORD1;
+                half2 uv : TEXCOORD2;
+                half3 tangentWS : TEXCOORD3;
             };
 
 
@@ -101,23 +101,24 @@ Shader "Hidden/CustomShaderTemplate"
             half4 frag(Varyings data) : SV_Target
             {
                 Light light = GetMainLight();
-                float3 L = SafeNormalize(light.direction);
-                float3 N = SafeNormalize(data.normalWS);
-                float3 T = SafeNormalize(data.tangentWS);
-                float3 B = cross(N, T);
-                float3x3 TBN = float3x3(T, B, N);
-                float3 n = SafeNormalize(UnpackNormal(tex2D(_BumpMap, data.uv)));
+                half3 L = SafeNormalize(light.direction);
+                half3 N = SafeNormalize(data.normalWS);
+                half3 T = SafeNormalize(data.tangentWS);
+                half3 B = cross(N, T);
+                half3x3 TBN = float3x3(T, B, N);
+                half3 n = SafeNormalize(UnpackNormal(tex2D(_BumpMap, data.uv)));
                 n = mul(n, TBN);
 
-                float3 V = SafeNormalize(_WorldSpaceCameraPos.xyz - data.positionWS);
-                float3 H = SafeNormalize(L + V);
-                float nv = saturate(dot(n, V));
-                float nl = saturate(dot(n, L));
+                half3 V = SafeNormalize(_WorldSpaceCameraPos.xyz - data.positionWS);
+                half3 H = SafeNormalize(L + V);
+                half nv = saturate(dot(n, V));
+                half nl = saturate(dot(n, L));
 
-                float3 albedo = tex2D(_BaseMap, data.uv) * _BaseColor.rgb;
+                half4 albedoColor = tex2D(_BaseMap, data.uv)*_BaseColor;
+                half3 albedo = albedoColor.rgb;
 
 
-                half3 F0 = half3(0.04, 0.04, 0.04);
+                half3 F0 = half3(0.04h, 0.04h, 0.04h);
                 _Metallic = tex2D(_MetallicMap, data.uv) * _Metallic;
                 F0 = lerp(F0, albedo, _Metallic);
                 half Roughness = tex2D(_RoughnessMap, data.uv) * _Roughness;
@@ -209,9 +210,9 @@ Shader "Hidden/CustomShaderTemplate"
                 // The positionOS variable contains the vertex positions in object
                 // space.
                 float4 positionOS : POSITION;
-                float3 normalOS : NORMAL;
-                float2 uv : TEXCOORD0;
-                float3 tangentOS : TANGENT;
+                half3 normalOS : NORMAL;
+                half2 uv : TEXCOORD0;
+                half3 tangentOS : TANGENT;
                 // float3 tangent : TANGENT;
             };
 
@@ -219,10 +220,10 @@ Shader "Hidden/CustomShaderTemplate"
             {
                 // The positions in this struct must have the SV_POSITION semantic.
                 float4 positionHCS : SV_POSITION;
-                float3 normalWS : TEXCOORD0;
-                float3 positionWS : TEXCOORD1;
-                float2 uv : TEXCOORD2;
-                float3 tangentWS : TEXCOORD3;
+                half3 normalWS : TEXCOORD0;
+                half3 positionWS : TEXCOORD1;
+                half2 uv : TEXCOORD2;
+                half3 tangentWS : TEXCOORD3;
             };
 
 
@@ -242,17 +243,15 @@ Shader "Hidden/CustomShaderTemplate"
                 OUT.uv = IN.uv;
                 return OUT;
             }
-
             // The fragment shader definition.
             half4 frag(Varyings data) : SV_Target
             {
-                float3 N = SafeNormalize(data.normalWS);
-                float3 T = SafeNormalize(data.tangentWS);
-                float3 B = cross(N, T);
-                float3x3 TBN = float3x3(T, B, N);
-                float3 n = SafeNormalize(UnpackNormal(tex2D(_BumpMap, data.uv)));
+                half3 N = SafeNormalize(data.normalWS);
+                half3 T = SafeNormalize(data.tangentWS);
+                half3 B = cross(N, T);
+                half3x3 TBN = float3x3(T, B, N);
+                half3 n = SafeNormalize(UnpackNormal(tex2D(_BumpMap, data.uv)));
                 n = mul(n, TBN);
-
                 return half4(n.xyz,0);;
             }
             ENDHLSL
