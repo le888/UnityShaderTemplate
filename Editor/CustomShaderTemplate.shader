@@ -6,6 +6,7 @@ Shader "Hidden/CustomShaderTemplate"
     // because the output color is predefined in the fragment shader code.
     Properties
     {
+        [KeywordEnum(None,Albode)]_Debug("Debug", Float) = 0
         _BaseColor("Color", Color) = (1,1,1,1)
         _BaseMap("Base (RGB)", 2D) = "white" {}
         [Normal]_BumpMap("Normal (RGB)", 2D) = "bump" {}
@@ -55,6 +56,8 @@ Shader "Hidden/CustomShaderTemplate"
             // HLSL files (for example, Common.hlsl, SpaceTransforms.hlsl, etc.).
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
+
+            #pragma shader_feature _DEBUG_NONE _DEBUG_ALBODE
             // The structure definition defines which variables it contains.
             // This example uses the Attributes structure as an input structure in
             // the vertex shader.
@@ -158,7 +161,13 @@ Shader "Hidden/CustomShaderTemplate"
                 // half3 specular = inspecPart1 * inspectPart2;
                 // float3 ambient = (diffuse * KD + specular);
                 // float3 finalColor = ambient + directColor.xyz;
-                return (albedo).xyzz;;
+
+                
+                #ifdef _Debug_ALBODE
+                    return (albedo).xyzz;;    
+                #endif
+                
+                return albedoColor;
             }
             ENDHLSL
         }
