@@ -1,6 +1,6 @@
 
 // This shader fills the mesh shape with a color predefined in the code.
-Shader "Hidden/CustomShaderTemplate"
+Shader "Custom/#NAME#"
 {
     // The properties block of the Unity shader. In this example this block is empty
     // because the output color is predefined in the fragment shader code.
