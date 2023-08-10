@@ -1,4 +1,3 @@
-
 // This shader fills the mesh shape with a color predefined in the code.
 Shader "Custom/#NAME#"
 {
@@ -18,12 +17,12 @@ Shader "Custom/#NAME#"
 
     // The SubShader block containing the Shader code.
     SubShader
-      {
+    {
         // SubShader Tags define when and under which conditions a SubShader block or
         // a pass is executed.
         Tags
         {
-            "RenderType" = "Opaque"  "Queue" = "Opaque" "RenderPipeline" = "UniversalPipeline"
+            "RenderType" = "Opaque" "Queue" = "Opaque" "RenderPipeline" = "UniversalPipeline"
         }
         Pass
         {
@@ -43,11 +42,13 @@ Shader "Custom/#NAME#"
             sampler2D _MetallicMap;
             sampler2D _RoughnessMap;
 
+            // sampler2D _CameraDepthTexture;
             CBUFFER_START(UnityPerMaterial)
-            float4 _BaseColor;
-            half _Roughness;
-            half _Metallic;
+                float4 _BaseColor;
+                half _Roughness;
+                half _Metallic;
             CBUFFER_END
+
             //Physically based Shading
 
             // This line defines the name of the vertex shader.
@@ -84,6 +85,7 @@ Shader "Custom/#NAME#"
                 half3 positionWS : TEXCOORD1;
                 half2 uv : TEXCOORD2;
                 half3 tangentWS : TEXCOORD3;
+                half4 positionNDC : TEXCOORD4;
             };
 
 
@@ -101,6 +103,10 @@ Shader "Custom/#NAME#"
                 OUT.positionWS = positionWS;
                 OUT.tangentWS = TransformObjectToWorldDir(IN.tangentOS);
                 OUT.uv = IN.uv;
+
+                half4 ndc = OUT.positionHCS * 0.5;
+                OUT.positionNDC.xy = float2(ndc.x, ndc.y * _ProjectionParams.x) + ndc.w;//  (-w < x(-y) < w --> 0 < xy < w)
+                OUT.positionNDC.zw = OUT.positionHCS.zw;
                 return OUT;
             }
 
@@ -121,8 +127,14 @@ Shader "Custom/#NAME#"
                 half nv = saturate(dot(n, V));
                 half nl = saturate(dot(n, L));
 
-                half4 albedoColor = tex2D(_BaseMap, data.uv)*_BaseColor;
+                half4 albedoColor = tex2D(_BaseMap, data.uv) * _BaseColor;
                 half3 albedo = albedoColor.rgb;
+
+
+                // float sceneZ = tex2D(_CameraDepthTexture,data.positionNDC.xy/data.positionNDC.w);
+                //  sceneZ = LinearEyeDepth(sceneZ, _ZBufferParams);
+                // float partZ = data.positionNDC.w;
+                // float diffZ = (sceneZ - partZ)/50;
 
 
                 half3 F0 = half3(0.04h, 0.04h, 0.04h);
@@ -166,11 +178,11 @@ Shader "Custom/#NAME#"
                 // float3 ambient = (diffuse * KD + specular);
                 // float3 finalColor = ambient + directColor.xyz;
 
-                
+
                 #ifdef _Debug_ALBODE
                     return (albedo).xyzz;;    
                 #endif
-                
+
                 return albedoColor;
             }
             ENDHLSL
@@ -178,7 +190,7 @@ Shader "Custom/#NAME#"
 
         Pass
         {
-             Name "DepthNormals"
+            Name "DepthNormals"
             Tags
             {
                 "LightMode" = "DepthNormals"
@@ -199,10 +211,11 @@ Shader "Custom/#NAME#"
             sampler2D _RoughnessMap;
 
             CBUFFER_START(UnityPerMaterial)
-            float4 _BaseColor;
-            half _Roughness;
-            half _Metallic;
+                float4 _BaseColor;
+                half _Roughness;
+                half _Metallic;
             CBUFFER_END
+
             //Physically based Shading
 
             // This line defines the name of the vertex shader.
@@ -256,6 +269,7 @@ Shader "Custom/#NAME#"
                 OUT.uv = IN.uv;
                 return OUT;
             }
+
             // The fragment shader definition.
             half4 frag(Varyings data) : SV_Target
             {
@@ -265,7 +279,7 @@ Shader "Custom/#NAME#"
                 half3x3 TBN = float3x3(T, B, N);
                 half3 n = SafeNormalize(UnpackNormal(tex2D(_BumpMap, data.uv)));
                 n = mul(n, TBN);
-                return half4(n.xyz,0);;
+                return half4(n.xyz, 0);;
             }
             ENDHLSL
         }
