@@ -23,10 +23,14 @@ Shader "Custom/#NAME#"
         // a pass is executed.
         Tags
         {
-            "RenderType" = "Opaque" "RenderPipeline" = "UniversalPipeline"
+            "RenderType" = "Opaque"  "Queue" = "Opaque" "RenderPipeline" = "UniversalPipeline"
         }
         Pass
         {
+            Blend One Zero
+            ZWrite On
+            ZTest On
+            Cull Back
             // The HLSL code block. Unity SRP uses the HLSL language.
             HLSLPROGRAM
             #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/EntityLighting.hlsl"
