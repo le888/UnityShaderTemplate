@@ -122,8 +122,8 @@ Shader "Custom/#NAME#"
                 half3 T = SafeNormalize(data.tangentWS);
                 half3 B = cross(N, T);
                 half3x3 TBN = float3x3(T, B, N);
-                half3 normalMap = SafeNormalize(UnpackNormal(tex2D(_BumpMap, data.uv)));
-                // n = mul(n, TBN);
+                half3 normalTS = SafeNormalize(UnpackNormal(tex2D(_BumpMap, data.uv)));
+                half3 normalWS = mul(normalTS, TBN);
 
                 half3 V = SafeNormalize(_WorldSpaceCameraPos.xyz - data.positionWS);
                 half3 H = SafeNormalize(L + V);
@@ -137,7 +137,7 @@ Shader "Custom/#NAME#"
                 InputData input = (InputData)0;
                 input.positionWS = data.positionWS;
                 input.positionCS = data.positionHCS;
-                input.normalWS = normalMap;
+                input.normalWS = normalWS;
                 input.viewDirectionWS = V;
                 input.shadowCoord = TransformWorldToShadowCoord( data.positionWS );;
                 input.fogCoord = InitializeInputDataFog(float4(input.positionWS, 1.0), data.fogFactor);
@@ -156,7 +156,7 @@ Shader "Custom/#NAME#"
                 surfaceData.specular = 0;
                 surfaceData.metallic = _Metallic;
                 surfaceData.smoothness = 1-Roughness;
-                surfaceData.normalTS = normalMap;
+                surfaceData.normalTS = normalTS;
                 surfaceData.emission = 0;
                 surfaceData.occlusion = 0;
                 surfaceData.alpha = albedoColor.a;
