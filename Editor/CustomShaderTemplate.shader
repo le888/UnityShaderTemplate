@@ -22,7 +22,7 @@ Shader "Custom/#NAME#"
         // a pass is executed.
         Tags
         {
-            "RenderType" = "Opaque" "Queue" = "Opaque" "RenderPipeline" = "UniversalPipeline"
+            "RenderType" = "Opaque" "RenderPipeline" = "UniversalPipeline"
         }
         Pass
         {
@@ -105,7 +105,8 @@ Shader "Custom/#NAME#"
                 OUT.uv = IN.uv;
 
                 half4 ndc = OUT.positionHCS * 0.5;
-                OUT.positionNDC.xy = float2(ndc.x, ndc.y * _ProjectionParams.x) + ndc.w;//  (-w < x(-y) < w --> 0 < xy < w)
+                OUT.positionNDC.xy = float2(ndc.x, ndc.y * _ProjectionParams.x) + ndc.w;
+                //  (-w < x(-y) < w --> 0 < xy < w)
                 OUT.positionNDC.zw = OUT.positionHCS.zw;
                 return OUT;
             }
@@ -141,7 +142,13 @@ Shader "Custom/#NAME#"
                 _Metallic = tex2D(_MetallicMap, data.uv) * _Metallic;
                 F0 = lerp(F0, albedo, _Metallic);
                 half Roughness = tex2D(_RoughnessMap, data.uv) * _Roughness;
+                #ifdef _UNITY_VERSION_2022_1_OR_NEWER
+                uint meshRenderingLayers = GetMeshRenderingLayer();
+                #else
                 uint meshRenderingLayers = GetMeshRenderingLightLayer();
+                
+                #endif
+
                 //mainLightCalculate
 
 
