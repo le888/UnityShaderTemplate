@@ -10,6 +10,15 @@ namespace UnityEditor.CreateShaderTemplate
             // 创建一个新的Shader文件
             ProjectWindowUtil.CreateScriptAssetFromTemplateFile("Packages/com.le888.create-shader-template/Editor/CustomShaderTemplate.shader", "NewCustomShader.shader");
         }
+        
+        [MenuItem("Assets/Create/ShaderTemple/Custom Shader PBR", priority = 200)]
+        public static void CreateCustomShaderPBR()
+        {
+            // 创建一个新的Shader文件
+            ProjectWindowUtil.CreateScriptAssetFromTemplateFile("Packages/com.le888.create-shader-template/Editor/CustomShaderTemplatePBR.shader", "NewCustomShader.shader");
+        }
+        
+        
     }
 }    
 

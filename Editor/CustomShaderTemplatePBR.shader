@@ -122,13 +122,13 @@ Shader "Custom/#NAME#"
                 half3 T = SafeNormalize(data.tangentWS);
                 half3 B = cross(N, T);
                 half3x3 TBN = float3x3(T, B, N);
-                half3 n = SafeNormalize(UnpackNormal(tex2D(_BumpMap, data.uv)));
-                n = mul(n, TBN);
+                half3 normalMap = SafeNormalize(UnpackNormal(tex2D(_BumpMap, data.uv)));
+                // n = mul(n, TBN);
 
                 half3 V = SafeNormalize(_WorldSpaceCameraPos.xyz - data.positionWS);
                 half3 H = SafeNormalize(L + V);
-                half nv = saturate(dot(n, V));
-                half nl = saturate(dot(n, L));
+                // half nv = saturate(dot(n, V));
+                // half nl = saturate(dot(n, L));
 
                 half4 albedoColor = tex2D(_BaseMap, data.uv) * _BaseColor;
                 half3 albedo = albedoColor.rgb;
@@ -137,7 +137,7 @@ Shader "Custom/#NAME#"
                 InputData input = (InputData)0;
                 input.positionWS = data.positionWS;
                 input.positionCS = data.positionHCS;
-                input.normalWS = n;
+                input.normalWS = normalMap;
                 input.viewDirectionWS = V;
                 input.shadowCoord = TransformWorldToShadowCoord( data.positionWS );;
                 input.fogCoord = InitializeInputDataFog(float4(input.positionWS, 1.0), data.fogFactor);
@@ -147,7 +147,22 @@ Shader "Custom/#NAME#"
                 input.shadowMask = SAMPLE_SHADOWMASK(IN.lightmapUVOrVertexSH.xy);;
                 input.tangentToWorld =  TBN;
                 /////////////////////////////////////////////////////////////
+                _Metallic = tex2D(_MetallicMap, data.uv) * _Metallic;
+                half Roughness = tex2D(_RoughnessMap, data.uv) * _Roughness;
+                SurfaceData surfaceData;
 
+                
+                surfaceData.albedo = albedo;
+                surfaceData.specular = 0;
+                surfaceData.metallic = _Metallic;
+                surfaceData.smoothness = 1-Roughness;
+                surfaceData.normalTS = normalMap;
+                surfaceData.emission = 0;
+                surfaceData.occlusion = 0;
+                surfaceData.alpha = albedoColor.a;
+                surfaceData.clearCoatMask = 0;
+                surfaceData.clearCoatSmoothness = 0;
+                return  UniversalFragmentPBR(input,surfaceData);
                 
                 
                 // float sceneZ = tex2D(_CameraDepthTexture,data.positionNDC.xy/data.positionNDC.w);
@@ -157,9 +172,7 @@ Shader "Custom/#NAME#"
 
 
                 half3 F0 = half3(0.04h, 0.04h, 0.04h);
-                _Metallic = tex2D(_MetallicMap, data.uv) * _Metallic;
                 F0 = lerp(F0, albedo, _Metallic);
-                half Roughness = tex2D(_RoughnessMap, data.uv) * _Roughness;
                 #ifdef _UNITY_VERSION_2022_1_OR_NEWER
                 uint meshRenderingLayers = GetMeshRenderingLayer();
                 #else
