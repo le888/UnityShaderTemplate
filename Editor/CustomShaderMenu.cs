@@ -1,4 +1,6 @@
 
+using System.IO;
+
 namespace UnityEditor.CreateShaderTemplate
 {
     public static class CustomShaderMenu
@@ -18,7 +20,31 @@ namespace UnityEditor.CreateShaderTemplate
             ProjectWindowUtil.CreateScriptAssetFromTemplateFile("Packages/com.le888.create-shader-template/Editor/CustomShaderTemplatePBR.shader", "NewCustomShader.shader");
         }
         
+        [MenuItem("Assets/Create/ShaderTemple/Custom HLSL", priority = 201)]
+        public static void CreateCustomHLSL()
+        {
+            // 创建一个新的Shader文件
+            ProjectWindowUtil.CreateScriptAssetFromTemplateFile("Packages/com.le888.create-shader-template/Editor/HLSLTemplate.hlsl", "NewCustomHLSL.HLSL");
+        }
         
+    }
+    
+    public class ScriptsInfoEditor : UnityEditor.AssetModificationProcessor
+    {
+        public const string authorName = "tackor(修改为你自己的名称即可)";
+
+        private static void OnWillCreateAsset(string path)
+        {
+            path = path.Replace(".meta", "");
+            if (path.EndsWith(".HLSL"))
+            {
+                string fileName = Path.GetFileName(path);
+                fileName = fileName.Substring(0, fileName.LastIndexOf("."));
+                string str = File.ReadAllText(path);
+                str = str.Replace("#UPPNAME#", fileName.ToUpper());
+                File.WriteAllText(path, str);
+            }
+        }
     }
 }    
 
