@@ -159,8 +159,8 @@ Shader "Custom/#NAME#"
                 half3 F0 = half3(0.04h, 0.04h, 0.04h);
                 _Metallic = tex2D(_MetallicMap, data.uv) * _Metallic;
                 F0 = lerp(F0, albedo, _Metallic);
-                half Roughness = tex2D(_RoughnessMap, data.uv) * _Roughness;
-                #ifdef _UNITY_VERSION_2022_1_OR_NEWER
+                half Roughness = tex2D(_RoughnessMap,data.uv) * _Roughness;
+                #if UNITY_VERSION >= 202210
                 uint meshRenderingLayers = GetMeshRenderingLayer();
                 #else
                 uint meshRenderingLayers = GetMeshRenderingLightLayer();
