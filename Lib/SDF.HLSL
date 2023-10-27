@@ -1,6 +1,7 @@
 #ifndef _SDF_HLSL_
 #define _SDF_HLSL_
 
+//https://iquilezles.org/articles/
 //https://iquilezles.org/www/articles/distfunctions/distfunctions.htm
 
 float dot2( in float2 v ) { return dot(v,v); }
@@ -372,4 +373,87 @@ float opSmoothIntersection( float d1, float d2, float k ) {
     return lerp( d2, d1, h ) + k*h*(1.0-h); }
 
 
+//法线计算
+// float3 calcNormal(float3 pos,float epsilon = 0.01)
+// {
+//     float2 e = float2(1.0,-1.0)*0.5773;
+//     return normalize(e.xyy*map(pos + e.xyy*epsilon) + 
+//                      e.yyx*map(pos + e.yyx*epsilon) + 
+//                      e.yxy*map(pos + e.yxy*epsilon) + 
+//                      e.xxx*map(pos + e.xxx*epsilon));
+// }
+// float3 calcNormal2(float3 pos,float epsilon = 0.01)
+// {
+//     float3 normal;
+//     normal.x = (map(pos + float3(epsilon, 0, 0)) - map(pos - float3(epsilon, 0, 0))) / (2.0 * epsilon);
+//     normal.y = (map(pos + float3(0, epsilon, 0)) - map(pos - float3(0, epsilon, 0))) / (2.0 * epsilon);
+//     normal.z = (map(pos + float3(0, 0, epsilon)) - map(pos - float3(0, 0, epsilon))) / (2.0 * epsilon);
+//     normal = normalize(normal);
+//     return normal;
+// }
+
+
+// https://gist.github.com/DomNomNom/46bb1ce47f68d255fd5d
+// Compute the near and far intersections using the slab method.
+// No intersection if tNear > tFar.
+float2 intersectAABB(float3 rayOrigin, float3 rayDir, float3 boxMin, float3 boxMax)
+{
+    float3 tMin = (boxMin - rayOrigin) / rayDir;
+    float3 tMax = (boxMax - rayOrigin) / rayDir;
+    float3 t1 = min(tMin, tMax);
+    float3 t2 = max(tMin, tMax);
+    float tNear = max(max(t1.x, t1.y), t1.z);
+    float tFar = min(min(t2.x, t2.y), t2.z);
+    return float2(tNear, tFar);
+}
+
+bool intersectAABB(float3 rayOrigin, float3 rayDir, float3 boxMin,
+                               float3 boxMax, out float2 tNearFar)
+{
+    float3 tMin = (boxMin - rayOrigin) / rayDir;
+    float3 tMax = (boxMax - rayOrigin) / rayDir;
+    float3 t1 = min(tMin, tMax);
+    float3 t2 = max(tMin, tMax);
+    float tNear = max(max(t1.x, t1.y), t1.z);
+    float tFar = min(min(t2.x, t2.y), t2.z);
+    tNearFar = float2(tNear, tFar);
+
+    return tFar > tNear;
+}
+
+
+//shadow
+
+/* //withMap map里面表示场景的sdf
+// https://iquilezles.org/articles/rmshadows
+float calcHardShadow(float3 ro, float3 rd, float mint, float maxt)
+{
+    float t = mint;
+    for (int i = 0; i < 256 && t < maxt; i++)
+    {
+        float h = map(ro + rd * t);
+        //到达物体表面=》有物体遮挡
+        if (h < 0.001)
+            return 0.0;
+        t += h;
+    }
+    return 1.0;
+}
+
+// https://iquilezles.org/articles/rmshadows
+float calcSoftShadow(float3 ro, float3 rd, float mint, float maxt, float k)
+{
+    float res = 1.0;
+    float t = mint;
+    for (int i = 0; i < 256 && t < maxt; i++)
+    {
+        float h = map(ro + rd * t);
+        if (h < 0.001)
+            return 0.0;
+        res = min(res, k * h / t);
+        t += h;
+    }
+    return res;
+}
+*/
 #endif
