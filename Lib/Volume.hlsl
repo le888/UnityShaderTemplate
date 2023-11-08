@@ -19,14 +19,16 @@
 
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 //标准算法  光各项异性传播
-float HenyeyGreenStein(float g,float costh)
+float HenyeyGreenStein(float anisotropy,float costh)
 {
+    float g = anisotropy;
     return (1.0/(4.0*PI))*((1.0-g*g)/(pow(1.0+g*g-2.0*g*costh,1.5)));
 }
 
-float Dual_Lob_HenyeyGreenstein(float g,float costh,float k)
+float Dual_Lob_HenyeyGreenstein(float anisotropy,float costh,float k)
 {
-    return lerp(HenyeyGreenStein(g,costh),HenyeyGreenStein(g,costh),k);
+    float g = anisotropy;
+    return lerp(HenyeyGreenStein(-g,costh),HenyeyGreenStein(g,costh),k);
 }
 
 float MultipleOctaveScattering(float density,float costh,float absorption)
@@ -42,7 +44,8 @@ float MultipleOctaveScattering(float density,float costh,float absorption)
     float g = 0.85;
 
     float luminance = 0.0;
-    [UNITY_LOOP]
+    
+    UNITY_LOOP
     for (int i = 0;i<scatteringOctaves;i++)
     {
         float phaseFunction = HenyeyGreenStein(0.3*c,costh);
