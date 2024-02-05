@@ -25,6 +25,11 @@ float HenyeyGreenStein(float anisotropy,float costh)
     return (1.0/(4.0*PI))*((1.0-g*g)/(pow(1.0+g*g-2.0*g*costh,1.5)));
 }
 
+float HenyeyGreenSteinMax(float anisotropy,float costh)
+{
+    return max(HenyeyGreenStein(anisotropy,costh),HenyeyGreenStein(-anisotropy,costh));
+}
+
 float Dual_Lob_HenyeyGreenstein(float anisotropy,float costh,float k)
 {
     float g = anisotropy;
